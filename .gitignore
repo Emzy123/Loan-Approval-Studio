@@ -1,0 +1,19 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+.DS_Store
+.idea/
+.vscode/
+
+.streamlit/secrets.toml
+
+# Optional: uncomment to keep model artifacts out of git
+# *.pkl
+# *.png
