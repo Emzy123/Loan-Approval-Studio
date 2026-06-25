@@ -17,3 +17,7 @@ build/
 # Optional: uncomment to keep model artifacts out of git
 # *.pkl
 # *.png
+
+# Lending Club raw downloads and generated training set
+data/lending_club/raw/
+data/lending_club/loan_applications.csv

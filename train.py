@@ -1,5 +1,6 @@
 """Train loan approval classifiers and save the best model."""
 
+import argparse
 from pathlib import Path
 
 import joblib
@@ -28,15 +29,58 @@ from inference import (
     fit_encoders,
     strip_categoricals,
 )
+from prepare_lending_club import OUTPUT_PATH, build_dataset
 
 ROOT = Path(__file__).resolve().parent
-DATASET = ROOT / "loan_approval_dataset_cleaned.csv"
+LEGACY_DATASET = ROOT / "loan_approval_dataset_cleaned.csv"
+DEFAULT_DATASET = OUTPUT_PATH
 MODEL_PATH = ROOT / "loan_model.pkl"
 SCALER_PATH = ROOT / "scaler.pkl"
 
 
+def resolve_dataset(path: Path | None, prepare: bool) -> Path:
+    dataset = path or DEFAULT_DATASET
+    if dataset.exists():
+        return dataset
+    if prepare or dataset == DEFAULT_DATASET:
+        print(f"Building training dataset at {dataset}…")
+        df = build_dataset()
+        dataset.parent.mkdir(parents=True, exist_ok=True)
+        df.to_csv(dataset, index=False)
+        print(f"Wrote {len(df):,} rows")
+        return dataset
+    raise FileNotFoundError(
+        f"Dataset not found: {dataset}. Run: python prepare_lending_club.py"
+    )
+
+
 def main() -> None:
-    df = pd.read_csv(DATASET)
+    parser = argparse.ArgumentParser(description="Train loan approval models.")
+    parser.add_argument(
+        "--dataset",
+        type=Path,
+        default=None,
+        help=f"Training CSV (default: {DEFAULT_DATASET})",
+    )
+    parser.add_argument(
+        "--legacy",
+        action="store_true",
+        help=f"Train on {LEGACY_DATASET.name} instead of Lending Club data",
+    )
+    parser.add_argument(
+        "--prepare",
+        action="store_true",
+        help="Build the Lending Club dataset if the training CSV is missing",
+    )
+    args = parser.parse_args()
+
+    if args.legacy:
+        dataset = LEGACY_DATASET
+    else:
+        dataset = resolve_dataset(args.dataset, prepare=args.prepare)
+
+    df = pd.read_csv(dataset)
+    print(f"Training on {dataset} ({len(df):,} rows)")
     print(df.head())
 
     df = strip_categoricals(df)
@@ -103,10 +147,10 @@ def main() -> None:
     plt.savefig(ROOT / "precision_recall_curve.png", bbox_inches="tight")
     plt.close()
 
-    if best_model_name == "Random Forest":
+    if hasattr(best_model, "feature_importances_"):
         importance = best_model.feature_importances_
         pd.Series(importance, index=X.columns).sort_values().plot(kind="barh")
-        plt.title("Feature Importance")
+        plt.title(f"Feature Importance ({best_model_name})")
         plt.savefig(ROOT / "feature_importance.png", bbox_inches="tight")
         plt.close()
 
@@ -118,7 +162,12 @@ def main() -> None:
     joblib.dump(scaler, SCALER_PATH)
     joblib.dump(encoders, ENCODERS_PATH)
     joblib.dump(
-        {"best_model_name": best_model_name, "feature_columns": list(X.columns)},
+        {
+            "best_model_name": best_model_name,
+            "feature_columns": list(X.columns),
+            "dataset": str(dataset),
+            "training_rows": len(df),
+        },
         METADATA_PATH,
     )
     print(f"\nSaved model to {MODEL_PATH}")

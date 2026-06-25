@@ -27,7 +27,7 @@ pip install --default-timeout=300 --retries 10 -r requirements-notebook.txt
 ## Train (recommended)
 
 ```bash
-python train.py
+python .py
 ```
 
 Writes:
@@ -37,7 +37,7 @@ Writes:
 - `confusion_matrix.png`, `roc_curve.png`, `precision_recall_curve.png`
 
 ## Predict
-
+train
 After training:
 
 ```bash
@@ -61,7 +61,7 @@ pip install --default-timeout=600 --retries 15 -r requirements-ui.txt
 Retrain so encoders are saved (required for the UI):
 
 ```bash
-python train.py
+p
 ```
 
 Start the app:
@@ -70,8 +70,8 @@ Start the app:
 streamlit run app.py
 # or
 ./run_ui.sh
-```
-
+`
+``python train.py
 Open the URL shown in the terminal (usually http://localhost:8501).
 
 The UI uses a **4-step guided flow**: Profile → Financials → Review → Decision, with branded styling and confidence breakdown.

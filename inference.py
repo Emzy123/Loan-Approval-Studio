@@ -27,6 +27,7 @@ FEATURE_COLUMNS = [
 ]
 
 CATEGORICAL_COLUMNS = ["education", "self_employed"]
+EMPLOYMENT_TYPES = ["Academic Staff", "Non Academic Staff"]
 TARGET_COLUMN = "loan_status"
 
 
@@ -107,15 +108,15 @@ def category_options(encoders: dict[str, LabelEncoder]) -> dict[str, list[str]]:
 
 def default_sample() -> dict:
     return {
-        "no_of_dependents": 2,
+        "no_of_dependents": 0,
         "education": "Graduate",
-        "self_employed": "No",
-        "income_annum": 9_600_000,
-        "loan_amount": 29_900_000,
-        "loan_term": 12,
-        "cibil_score": 778,
-        "residential_assets_value": 2_400_000,
-        "commercial_assets_value": 17_600_000,
-        "luxury_assets_value": 22_700_000,
-        "bank_asset_value": 8_000_000,
+        "self_employed": "Non Academic Staff",
+        "income_annum": 3_735_000,
+        "loan_amount": 867_350,
+        "loan_term": 36,
+        "cibil_score": 677,
+        "residential_assets_value": 684_750,
+        "commercial_assets_value": 186_750,
+        "luxury_assets_value": 298_800,
+        "bank_asset_value": 347_795,
     }

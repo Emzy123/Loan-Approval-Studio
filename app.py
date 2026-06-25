@@ -76,7 +76,7 @@ def _field_labels() -> dict[str, str]:
     return {
         "no_of_dependents": "Dependents",
         "education": "Education",
-        "self_employed": "Self employed",
+        "self_employed": "Employment type",
         "income_annum": "Annual income",
         "loan_amount": "Loan amount",
         "loan_term": "Loan term",
@@ -163,7 +163,7 @@ def step_profile(options: dict, defaults: dict) -> None:
                 index=options["self_employed"].index(defaults["self_employed"])
                 if defaults["self_employed"] in options["self_employed"]
                 else 0,
-                help="Whether the applicant is self-employed.",
+                help="Select academic or non-academic staff category.",
             )
         with c2:
             cibil = st.slider(
@@ -283,6 +283,10 @@ def step_decision(sample: dict, model_name: str, currency: str) -> None:
         label, confidence, probs = st.session_state.result
         render_verdict(label, confidence, probs)
         st.caption(
+            "Use **Previous** below to return to your application, change any details, "
+            "and run the credit check again."
+        )
+        st.caption(
             f"Monetary inputs converted from {currency} to INR using indicative "
             f"exchange rates before scoring."
         )
@@ -299,7 +303,8 @@ def main() -> None:
         st.code(
             "cd ~/Desktop/projects/shino\n"
             "source .venv/bin/activate\n"
-            "python train.py\n"
+            "python prepare_lending_club.py\n"
+            "python train.py --prepare\n"
             "streamlit run app.py",
             language="bash",
         )
@@ -343,8 +348,11 @@ def main() -> None:
     nav_l, nav_c, nav_r = st.columns([1, 2, 1])
 
     with nav_l:
-        if step > 0 and step < last_step:
-            if st.button("← Back", use_container_width=True):
+        if step > 0:
+            back_label = "← Previous" if step == last_step else "← Back"
+            if st.button(back_label, use_container_width=True):
+                if step == last_step:
+                    st.session_state.result = None
                 st.session_state.step -= 1
                 st.rerun()
 
